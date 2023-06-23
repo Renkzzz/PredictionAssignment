@@ -1,0 +1,66 @@
+library(readxl)
+
+#2. T??alane_rehabilitatsioon_puhastatud
+data01<-read_excel(file.choose())
+names(data01)
+
+#copy 
+data02<-data01
+
+#SKIPPED because there are no NAs
+#remove missing values from specific columns  
+#data02<-data02[!is.na(data02$Algus_kp),]
+#data02<-data02[!is.na(data02$Lopp_kp),]
+
+#create variable TRTarv for counting each time TRT was used
+data02 <- data02 %>% 
+  group_by(UID) %>%
+  mutate(TRTarv = n())
+
+#date ranges to rows by month, elapsed system time 13.71 sec
+system.time(data02<-do.call(rbind, with(data02,lapply(1:nrow(data02), function(i) 
+  setDT(
+  data.frame(UID = UID[i], 
+             Sugu = Sugu[i], 
+             Vanus = Vanus[i], 
+             Elukoht = Elukoht[i],
+             Haridustase = Haridustase[i], 
+             Haridustaseme_grupp = Haridustaseme_grupp[i], 
+             T??v?ime_ulatus = T??v?ime_ulatus[i],
+             T??v?ime_tase = T??v?ime_tase[i],
+             P_liikumine = P_liikumine[i], 
+             P_kaeline_teg = P_kaeline_teg[i], 
+             P_suhtlemine = P_suhtlemine[i],
+             P_enesehooldus = P_enesehooldus[i], 
+             P_oppimine = P_oppimine[i], 
+             P_kohanemine = P_kohanemine[i], 
+             P_inimvah_suhted = P_inimvah_suhted[i],
+             Osaletud_p?evi = Osaletud_p?evi[i], 
+             Teenuse_tulemus = Teenuse_tulemus[i],
+             Katkestamise_kp = Katkestamise_kp[i], 
+             S?nniaasta = S?nniaasta[i],
+             TRTarv = TRTarv[i],
+             date = seq(as.Date(Algus_kp[i]), as.Date(Lopp_kp[i]), by = "month")))))))
+
+#date format to year-month
+data02$date<-format(as.Date(data02$date, format="%Y/%m/%d"),"%Y/%m")
+
+
+#dataset for matching later timeinvariant variables
+data02i <- data02[,c("UID", "Sugu", "S?nniaasta", "Elukoht", 
+                     "Haridustase", "Haridustaseme_grupp",
+                     "T??v?ime_ulatus", "T??v?ime_tase", "P_liikumine", 
+                     "P_kaeline_teg","P_suhtlemine", 
+                     "P_enesehooldus","P_oppimine", 
+                     "P_kohanemine", "P_inimvah_suhted", "TRTarv")]
+
+#remove duplicate values (same values occuring each date)
+data02i = data02i[!duplicated(data02i$UID), ]
+
+
+
+#dataset for matching later time-varying variables
+data02it <- data02[,c("UID", "Osaletud_p?evi", "Teenuse_tulemus", 
+                      "Katkestamise_kp", "date")]
+
+

@@ -1,0 +1,8 @@
+trUrl <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+teUrl <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+training <- read.csv(url(trUrl), na.strings=c("NA","#DIV/0!",""))
+testing <- read.csv(url(teUrl), na.strings=c("NA","#DIV/0!",""))
+training <- training[,colSums(is.na(training)) == 0]
+testing <- testing[,colSums(is.na(testing)) == 0]
+training <- training[,-c(1:7)]
+testing <- testing[,-c(1:7)]

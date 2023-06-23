@@ -1,0 +1,107 @@
+---
+title: "Prediction project"
+output: rmarkdown::github_document
+date: "2023-06-22"
+---
+
+## Getting data to R
+
+Downloading csv files from URL links:
+```{r cache=T}
+tr <- read.csv(url(
+  "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"),
+  na.strings=c("NA","#DIV/0!",""))
+
+te <- read.csv(url(
+  "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"),
+  na.strings=c("NA","#DIV/0!",""))
+```
+
+Cross-table for the dependent variable:
+```{r}
+table(tr$classe)
+```
+
+## Data processing
+
+Split the training data randomly into 80% of training and 20% of validation data: 
+```{r message=F}
+set.seed(6) #ensures reproducibility
+library(caret)
+train <- createDataPartition(tr$classe, p = 0.8, list = FALSE)
+training <- tr[train, ]
+validation <- tr[-train, ]
+```
+
+Removing first seven descriptive columns:
+```{r}
+training <- training[,-c(1:7)]
+validation <- validation[,-c(1:7)]
+```
+
+Identifying and removing predictors (features) in the training dataset that have little or no variance to improve modelling: 
+```{r}
+nonzero_columns <- nearZeroVar(training)
+training <- training[, -nonzero_columns]
+```
+
+Removing columns with 35% or more NAs (missing values)
+```{r}
+
+countlength <- sapply(training, function(x) {
+  sum(!(is.na(x) | x == ""))
+})
+
+drop_columns <- names(countlength[countlength < 0.75 * length(training$classe)])
+
+training <- training[, !names(training) %in% drop_columns]
+
+```
+
+
+## Training models and validation
+
+Applying random forest modelling:
+```{r message=F}
+library(randomForest)
+```
+
+```{r cache=TRUE}
+modelRF <- randomForest(as.factor(classe)~ ., data = training, importance = T, ntrees = 10)
+
+```
+
+Assessing model accuracy and error within the training dataset:
+
+```{r}
+training_prediction <- predict(modelRF, training)
+
+#make sure that the dependent variable is here as a factor!
+#..otherwise it will give an error about levels
+confusionMatrix(training_prediction, as.factor(training$classe))
+
+```
+
+The model has 99.9% accuracy and thus about 0.01% error.
+
+
+
+
+Out of sample validation:
+```{r}
+validation_prediction  <- predict(modelRF, validation)
+
+#make sure that the dependent variable is here as a factor!
+#..otherwise it will give an error about levels
+confusionMatrix(validation_prediction, as.factor(validation$classe))
+
+```
+
+Validation reveals 99.6% accuracy and thus about 0.04% out of sample error. The model seems to be rather adequate in predicting the classe variable.
+
+Model prediction based on the test data: 
+```{r}
+test_prediction <- predict(modelRF, te)
+test_prediction
+```
+
