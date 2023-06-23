@@ -59,9 +59,9 @@ training <- training[, !names(training) %in% drop_columns]
 ```
 
 
-## Training models and validation
+## Training the model and validation
 
-Applying random forest modelling:
+Applying random forest modelling due to its known good performance in making predictions (boosting was not used due to its long computational time):
 ```{r message=F}
 library(randomForest)
 ```
@@ -99,7 +99,7 @@ confusionMatrix(validation_prediction, as.factor(validation$classe))
 
 Validation reveals 99.6% accuracy and thus about 0.04% out of sample error. The model seems to be rather adequate in predicting the classe variable.
 
-Model prediction based on the test data: 
+## Model prediction based on the test data 
 ```{r}
 test_prediction <- predict(modelRF, te)
 test_prediction

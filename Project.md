@@ -66,9 +66,11 @@ drop_columns <- names(countlength[countlength < 0.75 * length(training$classe)])
 training <- training[, !names(training) %in% drop_columns]
 ```
 
-## Training models and validation
+## Training the model and validation
 
-Applying random forest modelling:
+Applying random forest modelling due to its known good performance in
+making predictions (boosting was not used due to its long computational
+time):
 
 ``` r
 library(randomForest)
@@ -139,38 +141,38 @@ confusionMatrix(validation_prediction, as.factor(validation$classe))
     ## Prediction    A    B    C    D    E
     ##          A 1116    1    0    0    0
     ##          B    0  757    2    0    0
-    ##          C    0    1  682    8    0
-    ##          D    0    0    0  635    4
+    ##          C    0    1  682    9    0
+    ##          D    0    0    0  634    4
     ##          E    0    0    0    0  717
     ## 
     ## Overall Statistics
     ##                                           
-    ##                Accuracy : 0.9959          
-    ##                  95% CI : (0.9934, 0.9977)
+    ##                Accuracy : 0.9957          
+    ##                  95% CI : (0.9931, 0.9975)
     ##     No Information Rate : 0.2845          
     ##     P-Value [Acc > NIR] : < 2.2e-16       
     ##                                           
-    ##                   Kappa : 0.9948          
+    ##                   Kappa : 0.9945          
     ##                                           
     ##  Mcnemar's Test P-Value : NA              
     ## 
     ## Statistics by Class:
     ## 
     ##                      Class: A Class: B Class: C Class: D Class: E
-    ## Sensitivity            1.0000   0.9974   0.9971   0.9876   0.9945
-    ## Specificity            0.9996   0.9994   0.9972   0.9988   1.0000
-    ## Pos Pred Value         0.9991   0.9974   0.9870   0.9937   1.0000
-    ## Neg Pred Value         1.0000   0.9994   0.9994   0.9976   0.9988
+    ## Sensitivity            1.0000   0.9974   0.9971   0.9860   0.9945
+    ## Specificity            0.9996   0.9994   0.9969   0.9988   1.0000
+    ## Pos Pred Value         0.9991   0.9974   0.9855   0.9937   1.0000
+    ## Neg Pred Value         1.0000   0.9994   0.9994   0.9973   0.9988
     ## Prevalence             0.2845   0.1935   0.1744   0.1639   0.1838
-    ## Detection Rate         0.2845   0.1930   0.1738   0.1619   0.1828
-    ## Detection Prevalence   0.2847   0.1935   0.1761   0.1629   0.1828
-    ## Balanced Accuracy      0.9998   0.9984   0.9971   0.9932   0.9972
+    ## Detection Rate         0.2845   0.1930   0.1738   0.1616   0.1828
+    ## Detection Prevalence   0.2847   0.1935   0.1764   0.1626   0.1828
+    ## Balanced Accuracy      0.9998   0.9984   0.9970   0.9924   0.9972
 
 Validation reveals 99.6% accuracy and thus about 0.04% out of sample
 error. The model seems to be rather adequate in predicting the classe
 variable.
 
-Model prediction based on the test data:
+## Model prediction based on the test data
 
 ``` r
 test_prediction <- predict(modelRF, te)
